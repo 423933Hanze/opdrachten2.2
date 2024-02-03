@@ -1,0 +1,12 @@
+---
+- hosts: logging_server
+  roles:
+  - cloudalchemy.prometheus
+  vars:
+    prometheus_targets:
+      node:
+      - targets:
+        - 10.0.2.22:9100
+        - 10.0.2.23:9100
+        labels:
+          env: champ

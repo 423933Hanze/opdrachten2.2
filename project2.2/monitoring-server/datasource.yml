@@ -1,0 +1,17 @@
+---
+- name: Install Grafana and Add Prometheus Data Source
+  hosts: logging_server
+  gather_facts: false
+  become: true
+  tasks:
+  - name:
+    community.grafana.grafana_datasource:
+      name: Prometheus
+      ds_type: prometheus
+      ds_url: http://127.0.0.1:9090
+      access: proxy
+      is_default: true
+      org_id: 1
+      url: http://127.0.0.1:3000/
+      grafana_user: "admin"
+      grafana_password: "admin"

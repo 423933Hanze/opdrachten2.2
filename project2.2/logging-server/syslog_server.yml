@@ -1,0 +1,48 @@
+---
+- name: Configure syslog server
+  hosts: logging_server
+  become: true
+  tasks:
+  - name: Install rsyslog
+    apt:
+      name: rsyslog
+      state: present
+
+  - name: Start service rsyslog, if not started
+    ansible.builtin.service:
+      name: rsyslog
+      state: started
+
+  - name: Enable service rsyslog to start on boot
+    ansible.builtin.service:
+      name: rsyslog
+      enabled: yes
+
+  - name: Uncomment and add new lines for UDP syslog reception in rsyslog config
+    lineinfile:
+      path: /etc/rsyslog.conf
+      regexp: '^#?\s*module\(load="imudp"\)'
+      line: 'module(load="imudp")'
+
+  - name: Uncomment and add new lines for UDP syslog reception in rsyslog config
+    lineinfile:
+      path: /etc/rsyslog.conf
+      regexp: '^#?\s*input\(type="imudp" port="514"\)'
+      line: 'input(type="imudp" port="514")'
+ 
+  - name: Uncomment and add new lines for TCP syslog reception in rsyslog config (module)
+    lineinfile:
+      path: /etc/rsyslog.conf
+      regexp: '^#?\s*module\(load="imtcp"\)'
+      line: 'module(load="imtcp")'
+
+  - name: Uncomment and add new lines for TCP syslog reception in rsyslog config (input)
+    lineinfile:
+      path: /etc/rsyslog.conf
+      regexp: '^#?\s*input\(type="imtcp" port="514"\)'
+      line: 'input(type="imtcp" port="514")'
+
+  - name: Restart service rsyslog
+    ansible.builtin.service:
+      name: rsyslog
+      state: restarted

@@ -1,0 +1,32 @@
+---
+- name: Configure syslog clients
+  hosts: targets
+  vars:
+    syslog_server_ip: 10.0.2.10
+  become: true
+  tasks:
+    - name: Install rsyslog
+      package:
+        name: rsyslog
+        state: present
+
+    - name: Configure rsyslog to forward logs to the syslog server
+      lineinfile:
+        dest: /etc/rsyslog.conf
+        line: '*.* @@{{ syslog_server_ip }}:514'
+        regexp: '^#*.* @@{{ syslog_server_ip }}:514'
+        state: present
+      notify: Restart rsyslog
+
+    - name: Start service rsyslog, if not started
+      ansible.builtin.service:
+        name: rsyslog
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: Restart rsyslog
+      ansible.builtin.service:
+        name: rsyslog
+        state: restarted
+

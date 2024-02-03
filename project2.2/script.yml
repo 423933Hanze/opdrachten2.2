@@ -1,0 +1,14 @@
+---
+- name: Update and upgrade packages on localhost
+  hosts: localhost
+  connection: local  
+  become: yes  # Run tasks with elevated privileges (sudo)
+
+  tasks:
+    - name: Update package cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Upgrade all packages
+      ansible.builtin.apt:
+        upgrade: yes

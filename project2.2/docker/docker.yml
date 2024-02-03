@@ -1,0 +1,43 @@
+---
+- hosts: docker
+  become: true
+  tasks:
+    - name: do the prerequisites 
+      shell:
+        cmd: | 
+          apt update
+          apt upgrade -y
+          apt install curl -y
+
+    - name: downnload docker
+      shell:
+        cmd: |
+          curl -sSL https://get.docker.com/ | sh
+          sudo usermod -aG docker root
+
+    - name: Unconditionally reboot the machine with all defaults
+      ansible.builtin.reboot:
+        msg: "Rebooting machine in 5 seconds"
+
+  
+    - name: docker build image 
+      shell:
+        cmd: |
+          sudo docker build . -t busybox
+          docker run --name testdocker4 busybox
+
+    - name: docker build image
+      shell:
+        cmd: |
+          docker ps -a
+      register: shell_output
+
+
+    - name: display Shell command output(ofwel laat zien dat een docker container gedraaid werd)
+      debug:
+        var: shell_output.stdout
+
+
+
+
+

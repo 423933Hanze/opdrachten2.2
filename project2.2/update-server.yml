@@ -1,0 +1,33 @@
+---
+- name: Copy file and set up cron job
+  hosts: logging_server
+  become: yes  # Run tasks with elevated privileges (sudo)
+
+  vars:
+    source_file_path: /home/gavin/project2.2/script.yml # Update this with the actual source file path
+    destination_path: /home/gavin  # Update this with the desired destination path
+    cron_job_command: "/bin/bash {{ destination_path }}/script.yml"
+
+  tasks:
+    - name: Copy the file to the destination
+      ansible.builtin.copy:
+        src: "{{ source_file_path }}"
+        dest: "{{ destination_path }}/script.yml"
+        mode: '0777'  # Set the permissions of the copied file
+
+    - name: Add cron job to run the file every day at 12 PM
+      ansible.builtin.cron:
+        name: "Run script daily at 12 PM"
+        job: "{{ cron_job_command }}"
+        minute: 0
+        hour: 12
+        user: "{{ ansible_env.SUDO_USER | default(ansible_env.USER) }}"
+
+    - name: Update package repositories
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install Ansible package
+      ansible.builtin.apt:
+        name: ansible
+        state: present

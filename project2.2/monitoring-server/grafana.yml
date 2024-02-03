@@ -1,0 +1,50 @@
+---
+- name: Install and set up grafana on Ubuntu 20.04
+  hosts: logging_server
+  become: yes
+  gather_facts: False
+  tasks:
+  - name: Update apt repo and cache on all Ubuntu box
+    apt:
+      update_cache: yes
+      force_apt_get: yes
+      cache_valid_time: 3600
+
+
+      #  - name: Upgrade all packages on servers
+      #apt:
+      #upgrade: dist
+      #force_apt_get: yes
+
+  - name: Install required packages
+    apt:
+      name:
+        - gnupg2
+        - curl
+        - software-properties-common
+        - apt-transport-https
+        - wget
+
+  - name: download Grafana GPG key
+    shell: |
+      sudo mkdir -p /etc/apt/keyrings/
+      wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+      echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+
+  - name: install grafana
+    shell: |
+      sudo apt-get update
+      sudo apt-get install grafana -y
+
+#  - name: Install the grafana package
+#    apt:
+#      name: grafana
+#      state: present
+#      update_cache: yes
+#      cache_valid_time: 3600
+
+  - name: Start grafana
+    systemd:
+      name: grafana-server
+      state: started
+      enabled: yes
